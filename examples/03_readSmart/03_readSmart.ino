@@ -12,20 +12,28 @@ void setup() {
   Serial.println("Start...");
 
   // 2. Настройка времени антидребезга (для всех кнопок сразу)
-  SavaButton::bounceTime(50); 
+  SavaButton::bounceTime(50);
 
   // 3. Инициализация пинов
-  // Кнопка 1: Пин 2, ожидаем +5В (внешний резистор на землю)
-  btnSimple(12); 
+  // Кнопка 1: Пин 12, режим PLUS (по умолчанию)
+  btnSimple(12);
+  // Настройка времени долгого нажатия 1000 мс
+  btnSimple.setLong(1000);
 
-  // Кнопка 2: Пин 3, внутренняя подтяжка (замыкает на землю)
+  // Кнопка 2: Пин 15, режим PLUS
   btnComplex(15, PLUS);
+  // Настройка параметров Smart:
+  // SM_DOUBLE - ждем двойной клик
+  // SM_PROG - включить прогрессивный авто-повтор
+  // 600 - время удержания (оно же начальная скорость шагов)
+  // 250 - время ожидания второго клика
+  btnComplex.setSmart(SM_DOUBLE, SM_PROG, 600, 250);
 }
 
 void loop() {
   // === ЛОГИКА КНОПКИ 1 (Простая: readLong) ===
-  // Аргумент: 1000 мс для долгого нажатия
-  uint8_t s1 = btnSimple.readLong(1000);
+  // Используем настройки из setup() - БЕЗ аргументов!
+  uint8_t s1 = btnSimple.readLong();
 
   if (s1 == BTN_CLICK) {
     Serial.println("Btn1: Клик");
@@ -36,32 +44,22 @@ void loop() {
 
 
   // === ЛОГИКА КНОПКИ 2 (Умная: readSmart) ===
-  // Аргументы:
-  // 1. SM_DOUBLE - ждем двойной клик
-  // 2. SM_PROG   - включить прогрессивный авто-повтор
-  // 3. 600       - время удержания (оно же начальная скорость шагов)
-  // 4. 250       - время ожидания второго клика
-  
-  uint8_t s2 = btnComplex.readSmart(SM_DOUBLE, SM_PROG, 600, 250);
+  // Используем настройки из setup() - БЕЗ аргументов!
+  // ВАЖНО: Т.к. включен SM_PROG (авто-повтор), BTN_LONG не возвращается!
+  // Вместо этого при удержании многократно возвращается BTN_CLICK
+  uint8_t s2 = btnComplex.readSmart();
 
   switch (s2) {
     case BTN_CLICK:
-      Serial.println("Btn2: Одиночный (с задержкой)");
+      value++; // Увеличиваем значение (работает и для одиночного клика, и для повтора!)
+      Serial.print("Btn2: Клик >> ");
+      Serial.println(value);
       break;
-      
+
     case BTN_DOUBLE:
       Serial.println("Btn2: ДВОЙНОЙ КЛИК!");
       value = 0; // Сброс значения
-      Serial.print("Value reset: "); Serial.println(value);
-      break;
-
-    case BTN_LONG:
-      Serial.println("Btn2: Старт удержания...");
-      break;
-
-    case BTN_REPEAT:
-      value++; // Увеличиваем значение
-      Serial.print("Btn2: Шаг >> "); 
+      Serial.print("Value reset: ");
       Serial.println(value);
       break;
   }

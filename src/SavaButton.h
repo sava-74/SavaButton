@@ -46,6 +46,24 @@ class SavaButton {
     static void bounceTime(uint8_t ms);
 
     /**
+     * @brief Настройка времени долгого нажатия для readLong
+     * @param longMs Время удержания в мс (по умолчанию 600)
+     */
+    void setLong(uint16_t longMs = 600);
+
+    /**
+     * @brief Настройка параметров для readSmart
+     * @param clickMode Режим кликов: SM_CLICK или SM_DOUBLE (по умолчанию SM_CLICK)
+     * @param repMode Режим повтора: SM_REP_NONE, SM_REPEAT, SM_PROG (по умолчанию SM_REPEAT)
+     * @param longMs Время долгого нажатия / Базовая скорость повтора (по умолчанию 600)
+     * @param doubleMs Время ожидания второго клика (по умолчанию 250)
+     */
+    void setSmart(uint8_t clickMode = SM_CLICK,
+                  uint8_t repMode = SM_REPEAT,
+                  uint16_t longMs = 600,
+                  uint16_t doubleMs = 250);
+
+    /**
      * @brief Базовое чтение состояния с антидребезгом
      * @return true - нажата, false - отпущена
      */
@@ -53,25 +71,20 @@ class SavaButton {
 
     /**
      * @brief Чтение с детектором длинного нажатия
-     * @param longMs Время удержания в мс (по умолчанию 800)
      * @return Код события: BTN_NONE, BTN_CLICK, BTN_LONG
+     * @note Используйте setLong() для настройки времени удержания
      */
-    uint8_t readLong(uint16_t longMs = 800);
+    uint8_t readLong();
 
     /**
      * @brief Умное чтение: Двойной клик + Авто-повтор (Прогрессивный)
-     * 
-     * @param clickMode Режим кликов: SM_CLICK (обычный) или SM_DOUBLE (ждать двойной)
-     * @param repMode Режим повтора: SM_REP_NONE, SM_REPEAT (обычный), SM_PROG (ускорение)
-     * @param longMs Время долгого нажатия / Базовая скорость повтора (по умолч. 800)
-     * @param doubleMs Время ожидания второго клика (по умолч. 250)
-     * 
-     * @return Код события: BTN_NONE, BTN_CLICK, BTN_LONG, BTN_DOUBLE, BTN_REPEAT
+     *
+     * @return Код события: BTN_NONE, BTN_CLICK, BTN_LONG, BTN_DOUBLE
+     * @note BTN_LONG возвращается только если repMode == SM_REP_NONE
+     * @note Если включен авто-повтор (SM_REPEAT/SM_PROG), то при удержании возвращается BTN_CLICK многократно
+     * @note Используйте setSmart() для настройки параметров
      */
-    uint8_t readSmart(uint8_t clickMode = SM_CLICK, 
-                      uint8_t repMode = SM_REPEAT, 
-                      uint16_t longMs = 800, 
-                      uint16_t doubleMs = 250);
+    uint8_t readSmart();
 
   private:
     uint8_t _pin;
@@ -93,6 +106,15 @@ class SavaButton {
     uint32_t _waitDoubleTimer;// Таймер ожидания второго клика
     uint32_t _repeatTimer;    // Таймер для отсчета шагов повтора
     uint16_t _repCounter;     // Счетчик шагов для прогрессии
+
+    // Сохраненные настройки для readLong
+    uint16_t _longMs;         // Время долгого нажатия
+
+    // Сохраненные настройки для readSmart
+    uint8_t _clickMode;       // Режим кликов (SM_CLICK / SM_DOUBLE)
+    uint8_t _repMode;         // Режим повтора (SM_REP_NONE / SM_REPEAT / SM_PROG)
+    uint16_t _smartLongMs;    // Время долгого нажатия для Smart
+    uint16_t _doubleMs;       // Время ожидания второго клика
 };
 
 #endif
