@@ -1,6 +1,11 @@
 #ifndef SavaButton_h
 #define SavaButton_h
 
+/**
+ * SavaButton Library v2.0.1
+ * Автор: SavaLab (sava-74@inbox.ru)
+ */
+
 #include <Arduino.h>
 
 // === КОНСТАНТЫ ПИНОВ ===
@@ -79,12 +84,13 @@ class SavaButton {
     /**
      * @brief Умное чтение: Двойной клик + Авто-повтор (Прогрессивный)
      *
+     * @param repeat Включить авто-повтор (по умолчанию true). При false удержание возвращает BTN_NONE
      * @return Код события: BTN_NONE, BTN_CLICK, BTN_LONG, BTN_DOUBLE
      * @note BTN_LONG возвращается только если repMode == SM_REP_NONE
      * @note Если включен авто-повтор (SM_REPEAT/SM_PROG), то при удержании возвращается BTN_CLICK многократно
-     * @note Используйте setSmart() для настройки параметров
+     * @note При repeat == false: короткое нажатие = BTN_CLICK, удержание = BTN_NONE
      */
-    uint8_t readSmart();
+    uint8_t readSmart(bool repeat = true);
 
   private:
     uint8_t _pin;

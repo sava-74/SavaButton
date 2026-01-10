@@ -6,6 +6,8 @@ SavaButton btnComplex;
 
 // Переменная которую будем менять кнопкой 2
 int value = 0;
+bool flagR = 0;
+
 
 void setup() {
   Serial.begin(115200);
@@ -20,8 +22,8 @@ void setup() {
   // Настройка времени долгого нажатия 1000 мс
   btnSimple.setLong(1000);
 
-  // Кнопка 2: Пин 15, режим PLUS
-  btnComplex(15, PLUS);
+  // Кнопка 2: Пин 13, режим PLUS
+  btnComplex(13, PLUS);
   // Настройка параметров Smart:
   // SM_DOUBLE - ждем двойной клик
   // SM_PROG - включить прогрессивный авто-повтор
@@ -39,7 +41,8 @@ void loop() {
     Serial.println("Btn1: Клик");
   }
   if (s1 == BTN_LONG) {
-    Serial.println("Btn1: Долгое удержание");
+    flagR = !flagR;
+    Serial.print("разрешить повтор = ");Serial.println(flagR);
   }
 
 
@@ -47,7 +50,7 @@ void loop() {
   // Используем настройки из setup() - БЕЗ аргументов!
   // ВАЖНО: Т.к. включен SM_PROG (авто-повтор), BTN_LONG не возвращается!
   // Вместо этого при удержании многократно возвращается BTN_CLICK
-  uint8_t s2 = btnComplex.readSmart();
+  uint8_t s2 = btnComplex.readSmart(flagR);
 
   switch (s2) {
     case BTN_CLICK:
@@ -59,7 +62,7 @@ void loop() {
     case BTN_DOUBLE:
       Serial.println("Btn2: ДВОЙНОЙ КЛИК!");
       value = 0; // Сброс значения
-      Serial.print("Value reset: ");
+      Serial.print("Сброс значения: ");
       Serial.println(value);
       break;
   }

@@ -1,3 +1,8 @@
+/**
+ * SavaButton Library v2.0.1
+ * Автор: SavaLab (sava-74@inbox.ru)
+ */
+
 #include "SavaButton.h"
 
 uint8_t SavaButton::_globalDebounceMs = 40;
@@ -102,7 +107,7 @@ uint8_t SavaButton::readLong() {
 }
 
 // === readSmart ===
-uint8_t SavaButton::readSmart() {
+uint8_t SavaButton::readSmart(bool repeat) {
     // 1. Читаем текущее состояние кнопки
     bool currentState = read();
     uint8_t result = BTN_NONE;
@@ -139,15 +144,19 @@ uint8_t SavaButton::readSmart() {
                 _waitingDouble = false; // Если держали долго, двойной клик отменяется
                 _repeatTimer = millis(); // Старт таймера повторов
 
-                // НОВАЯ ЛОГИКА: если включен авто-повтор, возвращаем BTN_CLICK
-                if (_repMode != SM_REP_NONE) {
+                // Проверяем: включен ли повтор И разрешен ли он аргументом
+                if (_repMode != SM_REP_NONE && repeat) {
                     result = BTN_CLICK;  // Первый клик при удержании
                 } else {
-                    result = BTN_LONG;   // Долгое нажатие (только если нет повтора)
+                    // repeat == false: НЕ возвращаем BTN_LONG, просто ничего (BTN_NONE)
+                    // Долгое нажатие возвращается только если repMode == SM_REP_NONE
+                    if (_repMode == SM_REP_NONE) {
+                        result = BTN_LONG;
+                    }
                 }
             }
             // Если Long уже был, работает Авто-повтор
-            else if (_repMode != SM_REP_NONE) {
+            else if (_repMode != SM_REP_NONE && repeat) {
                 uint16_t interval = _smartLongMs; // Базовая скорость
 
                 if (_repMode == SM_PROG) {
@@ -159,7 +168,7 @@ uint8_t SavaButton::readSmart() {
                 if (millis() - _repeatTimer > interval) {
                     _repeatTimer = millis();
                     _repCounter++;
-                    result = BTN_CLICK;  // ИЗМЕНЕНО: возвращаем BTN_CLICK вместо BTN_REPEAT
+                    result = BTN_CLICK;  // Возвращаем BTN_CLICK для повтора
                 }
             }
         }
