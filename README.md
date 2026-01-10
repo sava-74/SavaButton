@@ -291,7 +291,8 @@ void setup() {
 }
 
 void loop() {
-  uint8_t event = btn_value.readSmart();  // БЕЗ аргументов!
+  uint8_t event = btn_value.readSmart();  //аргумент по умолчанию`true` 
+                                          // — использует настройки из `setSmart()` (стандартное поведение)
 
   if (event == BTN_CLICK) {
     value++;  // Работает и для одиночного клика, и для повтора!
